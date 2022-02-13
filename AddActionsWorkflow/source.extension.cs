@@ -13,6 +13,6 @@ namespace AddActionsWorkflow
         public const string Language = "en-US";
         public const string Version = "1.0.0";
         public const string Author = "Tim Heuer";
-        public const string Tags = "";
+        public const string Tags = "github, actions, devops, workflow";
     }
 }
