@@ -8,16 +8,18 @@ internal sealed class MyCommand : BaseCommand<MyCommand>
 {
     protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
     {
-        var dirInfo = new DirectoryInfo(VS.Solutions.GetCurrentSolution().FullPath);
+        var dirInfo = new DirectoryInfo((await VS.Solutions.GetCurrentSolutionAsync()).FullPath);
 
-        var proc = new ProcessStartInfo();
-        proc.UseShellExecute = false;
-        proc.RedirectStandardOutput = true;
-        proc.RedirectStandardError = true;
-        proc.WorkingDirectory = dirInfo.Parent.FullName;
-        proc.FileName = "dotnet";
-        proc.Arguments = "new workflow -n build --no-update-check";
+        var proc = new ProcessStartInfo
+        {
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            WorkingDirectory = dirInfo.Parent.FullName,
+            FileName = "dotnet",
+            Arguments = "new workflow -n build --no-update-check"
+        };
 
-        Process.Start(proc);
+        _ = Process.Start(proc);
     }
 }
