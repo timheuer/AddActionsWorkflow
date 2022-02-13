@@ -32,8 +32,8 @@ jobs:
     env:
       Configuration: Release
       DeployExtension: False
-      VsixManifestPath: source.extension.vsixmanifest
-      VsixManifestSourcePath: source.extension.cs
+      VsixManifestPath: AddActionsWorkflow\source.extension.vsixmanifest
+      VsixManifestSourcePath: AddActionsWorkflow\source.extension.cs
       
     steps:
     - uses: actions/checkout@v2
