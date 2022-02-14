@@ -81,7 +81,6 @@ jobs:
           vsix-file: ${{ github.event.repository.name }}.vsix
 
       - name: Tag and Release
-        if: ${{ contains(github.event.head_commit.message, '[release]') }}
         id: tag_release
         uses: softprops/action-gh-release@v0.1.13
         with:
