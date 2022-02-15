@@ -23,10 +23,6 @@ internal sealed class MyCommand : BaseCommand<MyCommand>
 
         var workflowName = $"build-{Guid.NewGuid().ToString().Substring(0, 5)}";
         proc.StartInfo.Arguments = $"new workflow -n {workflowName} --no-update-check";
-        proc.ErrorDataReceived += (s, e) =>
-        {
-            Debug.WriteLine(e.ToString());
-        };
         proc.Start();
 
         // add solution folder
