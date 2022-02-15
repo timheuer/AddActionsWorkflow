@@ -36,7 +36,7 @@
 				<Icon guid="ImageCatalogGuid" id="CodeInformation" />
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
-					<ButtonText>New GitHub Actions Workflow</ButtonText>
+					<ButtonText>Add GitHub Actions Workflow</ButtonText>
 					<LocCanonicalName>.AddActionsWorkflow.AddWorkflow</LocCanonicalName>
 				</Strings>
 			</Button>
