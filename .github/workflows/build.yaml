@@ -65,7 +65,7 @@ jobs:
   publish:
     if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
     needs: build
-    runs-on: windows-2022
+    runs-on: windows-2019
 
     steps:
       - uses: actions/checkout@v2
