@@ -9,8 +9,22 @@
 	<Commands package="AddActionsWorkflow">
 		<Groups>
 			<Group guid="AddActionsWorkflow" id="MyMenuGroup" priority="0x0600">
-				<!--<Parent guid="VSMainMenu" id="Tools"/>-->
 				<Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_PROJNODE"/>
+			</Group>
+			<Group guid="AddActionsWorkflow" id="MyMenuGroup" priority="0x0600">
+				<Parent guid="VSMainMenu" id="Tools"/>
+			</Group>
+			<Group guid="AddActionsWorkflow" id="MyMenuGroup" priority="0x0600">
+				<Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_SOLNNODE"/>
+			</Group>
+			<Group guid="AddActionsWorkflow" id="MyMenuGroup" priority="0x0600">
+				<Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_WEBPROJECT"/>
+			</Group>
+			<Group guid="AddActionsWorkflow" id="MyMenuGroup" priority="0x0600">
+				<Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SLNFLDR_ADD_ITEM"/>
+			</Group>
+			<Group guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_ADD_ITEMS" priority="0x0600">
+				<Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_ADD"/>
 			</Group>
 		</Groups>
 
@@ -22,7 +36,16 @@
 				<Icon guid="ImageCatalogGuid" id="CodeInformation" />
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
-					<ButtonText>Add GitHub Actions Workflow</ButtonText>
+					<ButtonText>New GitHub Actions Workflow</ButtonText>
+					<LocCanonicalName>.AddActionsWorkflow.AddWorkflow</LocCanonicalName>
+				</Strings>
+			</Button>
+			<Button guid="AddActionsWorkflow" id="MyCommand" priority="0x0100" type="Button">
+				<Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_ADD_ITEMS" />
+				<Icon guid="ImageCatalogGuid" id="CodeInformation" />
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>GitHub Actions Workflow</ButtonText>
 					<LocCanonicalName>.AddActionsWorkflow.AddWorkflow</LocCanonicalName>
 				</Strings>
 			</Button>
