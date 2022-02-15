@@ -5,6 +5,7 @@
     "internalName": "MarkdownEditor2",
     "tags": [ "github", "actions", "devops", "workflow" ]
   },
+  "overview": "README.md",
   "publisher": "TimHeuer",
   "repo": "https://github.com/timheuer/AddActionsWorkflow"
 }
