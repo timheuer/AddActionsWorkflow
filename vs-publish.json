@@ -1,0 +1,10 @@
+{
+  "$schema": "http://json.schemastore.org/vsix-publish",
+  "categories": [ "source control", "build", "workflow" ],
+  "identity": {
+    "internalName": "MarkdownEditor2",
+    "tags": [ "github", "actions", "devops", "workflow" ]
+  },
+  "publisher": "TimHeuer",
+  "repo": "https://github.com/timheuer/AddActionsWorkflow"
+}
