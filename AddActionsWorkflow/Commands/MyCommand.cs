@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using AddActionsWorkflow.Options;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -21,8 +22,10 @@ internal sealed class MyCommand : BaseCommand<MyCommand>
         proc.StartInfo.WorkingDirectory = repoRoot;
         proc.StartInfo.FileName = "dotnet";
 
-        var workflowName = $"build-{Guid.NewGuid().ToString().Substring(0, 5)}";
-        proc.StartInfo.Arguments = $"new workflow -n {workflowName} --no-update-check";
+        var general = await General.GetLiveInstanceAsync();
+        var workflowName = general.RandomizeFileName ? $"{general.DefaultName}-{Guid.NewGuid().ToString().Substring(0, 5)}" : general.DefaultName;
+        var overwriteFile = general.OverwriteExisting ? "--force" : "";
+        proc.StartInfo.Arguments = $"new workflow -n {workflowName} --no-update-check {overwriteFile}";
         proc.Start();
 
         // add solution folder
@@ -33,16 +36,16 @@ internal sealed class MyCommand : BaseCommand<MyCommand>
         // if the folder exists, use it otherwise create
         foreach (var item in sln.Children)
         {
-            if (item.Name.ToLower() == "solution items")
+            if (item.Name.ToLower() == general.SolutionFolderName.ToLower())
             {
                 proj = item as SolutionFolder;
                 folderExists = true;
+                break;
             }
-            break;
         }
 
         if (!folderExists)
-            proj = await sln.AddSolutionFolderAsync("Solution Items");
+            proj = await sln.AddSolutionFolderAsync(general.SolutionFolderName);
 
         _ = await proj?.AddExistingFilesAsync(Path.Combine(slnDir, @$".github\workflows\{workflowName}.yaml"));
     }
@@ -60,11 +63,14 @@ internal sealed class MyCommand : BaseCommand<MyCommand>
         git.StartInfo.Arguments = "rev-parse --show-toplevel";
         git.Start();
 
-        rootGitDir = await git.StandardOutput.ReadToEndAsync();
-
         if (git.ExitCode == 0)
         {
+            rootGitDir = await git.StandardOutput.ReadToEndAsync();
             rootGitDir = rootGitDir.Replace('/', '\\').Replace("\n", "");
+        }
+        else
+        {
+            git.Kill();
         }
 
         return rootGitDir;
