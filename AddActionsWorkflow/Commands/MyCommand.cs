@@ -27,6 +27,7 @@ internal sealed class MyCommand : BaseCommand<MyCommand>
         var overwriteFile = general.OverwriteExisting ? "--force" : "";
         proc.StartInfo.Arguments = $"new workflow -n {workflowName} --no-update-check {overwriteFile}";
         proc.Start();
+        proc.WaitForExit();
 
         // add solution folder
         var sln = await VS.Solutions.GetCurrentSolutionAsync();
@@ -62,6 +63,7 @@ internal sealed class MyCommand : BaseCommand<MyCommand>
         git.StartInfo.FileName = "git";
         git.StartInfo.Arguments = "rev-parse --show-toplevel";
         git.Start();
+        git.WaitForExit();
 
         if (git.ExitCode == 0)
         {
