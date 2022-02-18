@@ -12,8 +12,8 @@ namespace AddActionsWorkflow.Options
         [Category("Generator")]
         [DisplayName("Default file name")]
         [Description("The base name of the workflow (.yaml) file to be generated")]
-        [DefaultValue("build-")]
-        public string DefaultName { get; set; } = "build-";
+        [DefaultValue("build")]
+        public string DefaultName { get; set; } = "build";
 
         [Category("Generator")]
         [DisplayName("Randomize file name")]
@@ -32,5 +32,11 @@ namespace AddActionsWorkflow.Options
         [Description("The Solution Items folder to add these to in the Visual Studio solution")]
         [DefaultValue("Solution Items")]
         public string SolutionFolderName { get; set; } = "Solution Items";
+
+        [Category("Generator")]
+        [DisplayName("Current branch")]
+        [Description("Will use the current branch name or 'main' if false")]
+        [DefaultValue(true)]
+        public bool UseCurrentBranchName { get; set; } = true;
     }
 }

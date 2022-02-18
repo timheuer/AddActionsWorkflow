@@ -12,17 +12,18 @@ namespace AddActionsWorkflow;
 internal sealed class MyCommand : BaseCommand<MyCommand>
 {
     string finaleWorkflowname = "";
+    string branchName = "main";
 
     protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
     {
         var dirInfo = new DirectoryInfo((await VS.Solutions.GetCurrentSolutionAsync()).FullPath);
         var slnDir = dirInfo.Parent.FullName;
 
-        // try to get the repo root
-        string repoRoot = await GetGitRootDirAsync(slnDir);
-
         // create the workflow file with options
         var options = await General.GetLiveInstanceAsync();
+
+        // try to get the repo root
+        string repoRoot = await GetGitRootDirAsync(slnDir, options.UseCurrentBranchName);
         var workflowCreated = await CreateWorkflowTemplateAsync(repoRoot, options);
 
         if (workflowCreated)
@@ -68,7 +69,7 @@ internal sealed class MyCommand : BaseCommand<MyCommand>
         var stdErrBuffer = new StringBuilder();
 
         var result = await Cli.Wrap("dotnet")
-            .WithArguments($"new workflow -n {finaleWorkflowname} --no-update-check {overwriteFile}")
+            .WithArguments($"new workflow -n {finaleWorkflowname} -b {branchName} --no-update-check {overwriteFile}")
             .WithWorkingDirectory(workingDirectory)
             .WithStandardOutputPipe(PipeTarget.ToStringBuilder(stdOutBuffer))
             .WithStandardErrorPipe(PipeTarget.ToStringBuilder(stdErrBuffer))
@@ -83,7 +84,7 @@ internal sealed class MyCommand : BaseCommand<MyCommand>
         return created;
     }
 
-    internal async Task<String> GetGitRootDirAsync(string workingDirectory)
+    internal async Task<String> GetGitRootDirAsync(string workingDirectory, bool useCurrentBranch)
     {
         await VS.StatusBar.ShowMessageAsync("Establishing git root directory...");
         var rootGitDir = workingDirectory;
@@ -105,8 +106,32 @@ internal sealed class MyCommand : BaseCommand<MyCommand>
         {
             rootGitDir = stdOut;
             rootGitDir = rootGitDir.Replace('/', '\\').Replace("\n", "");
+
+            if (useCurrentBranch) await GetCurrentBranchNameAsync(workingDirectory);
         }
 
         return rootGitDir;
+    }
+
+    internal async Task GetCurrentBranchNameAsync(string workingDirectory)
+    {
+        var stdOutBuffer = new StringBuilder();
+        var stdErrBuffer = new StringBuilder();
+
+        var result = await Cli.Wrap("git")
+            .WithArguments("branch --show-current")
+            .WithWorkingDirectory(workingDirectory)
+            .WithStandardOutputPipe(PipeTarget.ToStringBuilder(stdOutBuffer))
+            .WithStandardErrorPipe(PipeTarget.ToStringBuilder(stdErrBuffer))
+            .WithValidation(CommandResultValidation.None)
+            .ExecuteAsync();
+
+        var stdOut = stdOutBuffer.ToString();
+        var stdErr = stdErrBuffer.ToString();
+
+        if (result.ExitCode == 0)
+        {
+            branchName = stdOut;
+        }
     }
 }
