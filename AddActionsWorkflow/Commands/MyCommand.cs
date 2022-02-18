@@ -1,6 +1,9 @@
 ﻿using AddActionsWorkflow.Options;
+using CliWrap;
+using Microsoft;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace AddActionsWorkflow;
@@ -8,6 +11,8 @@ namespace AddActionsWorkflow;
 [Command(PackageIds.MyCommand)]
 internal sealed class MyCommand : BaseCommand<MyCommand>
 {
+    string finaleWorkflowname = "";
+
     protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
     {
         var dirInfo = new DirectoryInfo((await VS.Solutions.GetCurrentSolutionAsync()).FullPath);
@@ -15,68 +20,91 @@ internal sealed class MyCommand : BaseCommand<MyCommand>
 
         // try to get the repo root
         string repoRoot = await GetGitRootDirAsync(slnDir);
-        using Process proc = new();
-        proc.StartInfo.UseShellExecute = false;
-        proc.StartInfo.RedirectStandardOutput = true;
-        proc.StartInfo.RedirectStandardError = true;
-        proc.StartInfo.WorkingDirectory = repoRoot;
-        proc.StartInfo.FileName = "dotnet";
 
-        var general = await General.GetLiveInstanceAsync();
-        var workflowName = general.RandomizeFileName ? $"{general.DefaultName}-{Guid.NewGuid().ToString().Substring(0, 5)}" : general.DefaultName;
-        var overwriteFile = general.OverwriteExisting ? "--force" : "";
-        proc.StartInfo.Arguments = $"new workflow -n {workflowName} --no-update-check {overwriteFile}";
-        proc.Start();
+        // create the workflow file with options
+        var options = await General.GetLiveInstanceAsync();
+        var workflowCreated = await CreateWorkflowTemplateAsync(repoRoot, options);
 
-        // TODO: Fix for race condition
-        proc.WaitForExit();
-
-        // add solution folder
-        var sln = await VS.Solutions.GetCurrentSolutionAsync();
-        bool folderExists = false;
-        SolutionFolder proj = null;
-
-        // if the folder exists, use it otherwise create
-        foreach (var item in sln.Children)
+        if (workflowCreated)
         {
-            if (item.Name.ToLower() == general.SolutionFolderName.ToLower())
+            // add solution folder
+            var sln = await VS.Solutions.GetCurrentSolutionAsync();
+            bool folderExists = false;
+            SolutionFolder proj = null;
+
+            // if the folder exists, use it otherwise create
+            foreach (var item in sln.Children)
             {
-                proj = item as SolutionFolder;
-                folderExists = true;
-                break;
+                if (item.Name.ToLower() == options.SolutionFolderName.ToLower())
+                {
+                    proj = item as SolutionFolder;
+                    folderExists = true;
+                    break;
+                }
             }
+
+            if (!folderExists)
+                proj = await sln.AddSolutionFolderAsync(options.SolutionFolderName);
+
+            _ = await proj?.AddExistingFilesAsync(Path.Combine(slnDir, @$".github\workflows\{finaleWorkflowname}.yaml"));
+            await VS.StatusBar.ShowMessageAsync("GitHub Actions Worklfow creation finished.");
         }
+        else
+        {
+            // didn't happen, show an error
+            await VS.StatusBar.ShowMessageAsync("GitHub Actions Worklfow creation failed.");
+        }
+    }
 
-        if (!folderExists)
-            proj = await sln.AddSolutionFolderAsync(general.SolutionFolderName);
+    internal async Task<bool> CreateWorkflowTemplateAsync(string workingDirectory, General options)
+    {
+        await VS.StatusBar.ShowMessageAsync("Creating GitHub Actions workflow file...");
+        var rootGitDir = workingDirectory;
+        finaleWorkflowname = options.RandomizeFileName ? $"{options.DefaultName}-{Guid.NewGuid().ToString().Substring(0, 5)}" : options.DefaultName;
+        var overwriteFile = options.OverwriteExisting ? "--force" : "";
 
-        _ = await proj?.AddExistingFilesAsync(Path.Combine(slnDir, @$".github\workflows\{workflowName}.yaml"));
+        bool created = true;
+        var stdOutBuffer = new StringBuilder();
+        var stdErrBuffer = new StringBuilder();
+
+        var result = await Cli.Wrap("dotnet")
+            .WithArguments($"new workflow -n {finaleWorkflowname} --no-update-check {overwriteFile}")
+            .WithWorkingDirectory(workingDirectory)
+            .WithStandardOutputPipe(PipeTarget.ToStringBuilder(stdOutBuffer))
+            .WithStandardErrorPipe(PipeTarget.ToStringBuilder(stdErrBuffer))
+            .WithValidation(CommandResultValidation.None)
+            .ExecuteAsync();
+
+        var stdOut = stdOutBuffer.ToString();
+        var stdErr = stdErrBuffer.ToString();
+
+        if (result.ExitCode != 0) created = false;
+
+        return created;
     }
 
     internal async Task<String> GetGitRootDirAsync(string workingDirectory)
     {
+        await VS.StatusBar.ShowMessageAsync("Establishing git root directory...");
         var rootGitDir = workingDirectory;
+        var stdOutBuffer = new StringBuilder();
+        var stdErrBuffer = new StringBuilder();
 
-        using Process git = new();
-        git.StartInfo.WorkingDirectory = workingDirectory;
-        git.StartInfo.UseShellExecute = false;
-        git.StartInfo.RedirectStandardOutput = true;
-        git.StartInfo.RedirectStandardError = true;
-        git.StartInfo.FileName = "git";
-        git.StartInfo.Arguments = "rev-parse --show-toplevel";
-        git.Start();
+        var result = await Cli.Wrap("git")
+            .WithArguments("rev-parse --show-toplevel")
+            .WithWorkingDirectory(workingDirectory)
+            .WithStandardOutputPipe(PipeTarget.ToStringBuilder(stdOutBuffer))
+            .WithStandardErrorPipe(PipeTarget.ToStringBuilder(stdErrBuffer))
+            .WithValidation(CommandResultValidation.None)
+            .ExecuteAsync();
 
-        // TODO: Fix for race condition
-        git.WaitForExit();
+        var stdOut = stdOutBuffer.ToString();
+        var stdErr = stdErrBuffer.ToString();
 
-        if (git.ExitCode == 0)
+        if (result.ExitCode == 0)
         {
-            rootGitDir = await git.StandardOutput.ReadToEndAsync();
+            rootGitDir = stdOut;
             rootGitDir = rootGitDir.Replace('/', '\\').Replace("\n", "");
-        }
-        else
-        {
-            git.Kill();
         }
 
         return rootGitDir;
