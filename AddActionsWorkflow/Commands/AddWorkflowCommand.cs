@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace AddActionsWorkflow;
 
-[Command(PackageIds.MyCommand)]
-internal sealed class MyCommand : BaseCommand<MyCommand>
+[Command(PackageIds.AddWorkflowCommand)]
+internal sealed class AddWorkflowCommand : BaseCommand<AddWorkflowCommand>
 {
     string finaleWorkflowname = "";
     string branchName = "main";

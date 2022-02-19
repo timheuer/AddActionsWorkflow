@@ -31,22 +31,22 @@
 		<!--This section defines the elements the user can interact with, like a menu command or a button
         or combo box in a toolbar. -->
 		<Buttons>
-			<Button guid="AddActionsWorkflow" id="MyCommand" priority="0x0100" type="Button">
+			<Button guid="AddActionsWorkflow" id="AddWorkflowCommand" priority="0x0100" type="Button">
 				<Parent guid="AddActionsWorkflow" id="MyMenuGroup" />
-				<Icon guid="ImageCatalogGuid" id="CodeInformation" />
+				<Icon guid="ImageCatalogGuid" id="CSWorkflow" />
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>Add GitHub Actions Workflow</ButtonText>
 					<LocCanonicalName>.AddActionsWorkflow.AddWorkflow</LocCanonicalName>
 				</Strings>
 			</Button>
-			<Button guid="AddActionsWorkflow" id="MyCommand" priority="0x0100" type="Button">
-				<Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_ADD_ITEMS" />
-				<Icon guid="ImageCatalogGuid" id="CodeInformation" />
+			<Button guid="AddActionsWorkflow" id="LaunchRemoteUrlCommand" priority="0x0101" type="Button">
+				<Parent guid="AddActionsWorkflow" id="MyMenuGroup" />
+				<Icon guid="ImageCatalogGuid" id="OpenWebSite" />
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
-					<ButtonText>GitHub Actions Workflow</ButtonText>
-					<LocCanonicalName>.AddActionsWorkflow.AddWorkflow</LocCanonicalName>
+					<ButtonText>Open GitHub Repo</ButtonText>
+					<LocCanonicalName>.AddActionsWorkflow.LaunchRepoUrl</LocCanonicalName>
 				</Strings>
 			</Button>
 		</Buttons>
@@ -55,7 +55,8 @@
 	<Symbols>
 		<GuidSymbol name="AddActionsWorkflow" value="{ff8107ff-c891-4674-878d-c283252ce550}">
 			<IDSymbol name="MyMenuGroup" value="0x0001" />
-			<IDSymbol name="MyCommand" value="0x0100" />
+			<IDSymbol name="AddWorkflowCommand" value="0x0100" />
+			<IDSymbol name="LaunchRemoteUrlCommand" value="0x0101" />
 		</GuidSymbol>
 	</Symbols>
 </CommandTable>
