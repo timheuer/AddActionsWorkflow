@@ -33,7 +33,8 @@
 		<Buttons>
 			<Button guid="AddActionsWorkflow" id="AddWorkflowCommand" priority="0x0100" type="Button">
 				<Parent guid="AddActionsWorkflow" id="MyMenuGroup" />
-				<Icon guid="ImageCatalogGuid" id="CSWorkflow" />
+				<!-- using the ID for PublishWithGitHubActions because knownimageid is not working -->
+				<Icon guid="ImageCatalogGuid" id="3881" />
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>Add GitHub Actions Workflow</ButtonText>
