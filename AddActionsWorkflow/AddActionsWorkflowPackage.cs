@@ -19,5 +19,9 @@ public sealed class AddActionsWorkflowPackage : ToolkitPackage
     protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
     {
         await this.RegisterCommandsAsync();
+
+        RatingPrompt rating = new("TimHeuer.AddActionsWorkflow", Vsix.Name, await General.GetLiveInstanceAsync());
+        rating.RegisterSuccessfulUsage();
+        await rating.PromptAsync();
     }
 }

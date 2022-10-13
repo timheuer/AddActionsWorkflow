@@ -1,13 +1,15 @@
 ﻿using System.ComponentModel;
+using System.Runtime.InteropServices;
 
 namespace AddActionsWorkflow.Options;
 
 internal partial class OptionsProvider
 {
+    [ComVisible(true)]
     public class GeneralOptions : BaseOptionPage<General> { }
 }
 
-public class General : BaseOptionModel<General>
+public class General : BaseOptionModel<General>, IRatingConfig
 {
     [Category("Generator")]
     [DisplayName("Default file name")]
@@ -38,4 +40,5 @@ public class General : BaseOptionModel<General>
     [Description("Will use the current branch name or 'main' if false")]
     [DefaultValue(true)]
     public bool UseCurrentBranchName { get; set; } = true;
+    public int RatingRequests { get; set; }
 }
