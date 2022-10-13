@@ -20,6 +20,7 @@ public sealed class AddActionsWorkflowPackage : ToolkitPackage
     {
         await this.RegisterCommandsAsync();
 
+        // telemetry rating
         RatingPrompt rating = new("TimHeuer.AddActionsWorkflow", Vsix.Name, await General.GetLiveInstanceAsync());
         rating.RegisterSuccessfulUsage();
         await rating.PromptAsync();
