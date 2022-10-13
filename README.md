@@ -7,3 +7,6 @@ This is a very simple menu command that executes the `dotnet new workflow` comma
 There are known issues...view the [repo issues](https://github.com/timheuer/AddActionsWorkflow/issues) for things that need to make it smooth over.
 
 Yes, this is a hack, but I do this often and hate going to the terminal every time so there.
+
+## Installation
+Install from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=TimHeuer.AddActionsWorkflow) or from the Extension Manager directly in Visual Studio.
