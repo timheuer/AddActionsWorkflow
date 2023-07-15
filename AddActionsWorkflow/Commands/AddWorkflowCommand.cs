@@ -1,6 +1,6 @@
 ﻿using AddActionsWorkflow.Options;
 using CliWrap;
-using Microsoft;
+using LibGit2Sharp;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -11,7 +11,7 @@ namespace AddActionsWorkflow;
 [Command(PackageIds.AddWorkflowCommand)]
 internal sealed class AddWorkflowCommand : BaseCommand<AddWorkflowCommand>
 {
-    string finaleWorkflowname = "";
+    string finaleWorkflowname = string.Empty;
     string branchName = "main";
 
     protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
@@ -23,7 +23,7 @@ internal sealed class AddWorkflowCommand : BaseCommand<AddWorkflowCommand>
         var options = await General.GetLiveInstanceAsync();
 
         // try to get the repo root
-        string repoRoot = await GetGitRootDirAsync(slnDir, options.UseCurrentBranchName);
+        string repoRoot = await GetGitRootDirAsync(dirInfo.FullName, options.UseCurrentBranchName);
         var workflowCreated = await CreateWorkflowTemplateAsync(repoRoot, options);
 
         if (workflowCreated)
@@ -88,50 +88,25 @@ internal sealed class AddWorkflowCommand : BaseCommand<AddWorkflowCommand>
     {
         await VS.StatusBar.ShowMessageAsync("Establishing git root directory...");
         var rootGitDir = workingDirectory;
-        var stdOutBuffer = new StringBuilder();
-        var stdErrBuffer = new StringBuilder();
 
-        var result = await Cli.Wrap("git")
-            .WithArguments("rev-parse --show-toplevel")
-            .WithWorkingDirectory(workingDirectory)
-            .WithStandardOutputPipe(PipeTarget.ToStringBuilder(stdOutBuffer))
-            .WithStandardErrorPipe(PipeTarget.ToStringBuilder(stdErrBuffer))
-            .WithValidation(CommandResultValidation.None)
-            .ExecuteAsync();
-
-        var stdOut = stdOutBuffer.ToString();
-        var stdErr = stdErrBuffer.ToString();
-
-        if (result.ExitCode == 0)
+        while (!Directory.Exists(Path.Combine(rootGitDir, ".git")))
         {
-            rootGitDir = stdOut;
-            rootGitDir = rootGitDir.Replace('/', '\\').Replace("\n", "");
+            rootGitDir = Path.GetFullPath(Path.Combine(rootGitDir, ".."));
+        }
 
-            if (useCurrentBranch) await GetCurrentBranchNameAsync(workingDirectory);
+        try
+        {
+            using (var repo = new Repository(rootGitDir))
+            {
+                if (useCurrentBranch) branchName = repo.Head.FriendlyName;
+                rootGitDir = repo.Info.WorkingDirectory;
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.Message);
         }
 
         return rootGitDir;
-    }
-
-    internal async Task GetCurrentBranchNameAsync(string workingDirectory)
-    {
-        var stdOutBuffer = new StringBuilder();
-        var stdErrBuffer = new StringBuilder();
-
-        var result = await Cli.Wrap("git")
-            .WithArguments("branch --show-current")
-            .WithWorkingDirectory(workingDirectory)
-            .WithStandardOutputPipe(PipeTarget.ToStringBuilder(stdOutBuffer))
-            .WithStandardErrorPipe(PipeTarget.ToStringBuilder(stdErrBuffer))
-            .WithValidation(CommandResultValidation.None)
-            .ExecuteAsync();
-
-        var stdOut = stdOutBuffer.ToString();
-        var stdErr = stdErrBuffer.ToString();
-
-        if (result.ExitCode == 0)
-        {
-            branchName = stdOut;
-        }
     }
 }

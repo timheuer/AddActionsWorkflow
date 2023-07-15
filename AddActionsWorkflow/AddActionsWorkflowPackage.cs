@@ -14,6 +14,7 @@ namespace AddActionsWorkflow;
 [Guid(PackageGuids.AddActionsWorkflowString)]
 [ProvideOptionPage(typeof(OptionsProvider.GeneralOptions), "GitHub Actions Workflow", "General", 0, 0, true)]
 [ProvideProfile(typeof(OptionsProvider.GeneralOptions), "GitHub Actions Workflow", "General", 0, 0, true)]
+[ProvideBindingPath]
 public sealed class AddActionsWorkflowPackage : ToolkitPackage
 {
     protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)

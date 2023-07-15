@@ -11,7 +11,7 @@ namespace AddActionsWorkflow
         public const string Name = "Add Actions Workflow";
         public const string Description = @"Adds a GitHub Actions workflow to the solution";
         public const string Language = "en-US";
-        public const string Version = "1.0.0";
+        public const string Version = "1.0.1";
         public const string Author = "Tim Heuer";
         public const string Tags = "github, actions, devops, workflow";
     }

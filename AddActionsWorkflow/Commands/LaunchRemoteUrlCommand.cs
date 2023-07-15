@@ -1,12 +1,8 @@
-﻿using AddActionsWorkflow.Options;
-using CliWrap;
-using System;
-using System.Collections.Generic;
+﻿using LibGit2Sharp;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace AddActionsWorkflow.Commands;
 
@@ -17,29 +13,31 @@ internal class LaunchRemoteUrlCommand : BaseCommand<LaunchRemoteUrlCommand>
     {
         // get the repo URI
         var dirInfo = new DirectoryInfo((await VS.Solutions.GetCurrentSolutionAsync()).FullPath);
-        var slnDir = dirInfo.Parent.FullName;
+        
+        string path = dirInfo.FullName;
+
+        while (!Directory.Exists(Path.Combine(path, ".git")))
+        {
+            path = Path.GetFullPath(Path.Combine(path, ".."));
+        }
 
         var stdOutBuffer = new StringBuilder();
         var stdErrBuffer = new StringBuilder();
+        var remoteUri = string.Empty;
 
-        var result = await Cli.Wrap("git")
-            .WithArguments("remote get-url origin --push")
-            .WithWorkingDirectory(slnDir)
-            .WithStandardOutputPipe(PipeTarget.ToStringBuilder(stdOutBuffer))
-            .WithStandardErrorPipe(PipeTarget.ToStringBuilder(stdErrBuffer))
-            .WithValidation(CommandResultValidation.None)
-            .ExecuteAsync();
-
-        var stdOut = stdOutBuffer.ToString();
-        var stdErr = stdErrBuffer.ToString();
-
-        if (result.ExitCode == 0)
+        try
         {
-            _ = Process.Start(stdOut);
-        }
-        else
+            using (var repo = new Repository(path))
+            {
+                var headRemote = repo.Head.RemoteName;
+                var remote = repo.Network.Remotes.FirstOrDefault(r => r.Name == headRemote);
+                remoteUri = remote.Url;
+            }
+            _ = Process.Start(remoteUri);
+        } 
+        catch (Exception ex) 
         {
-            var argError = new UriFormatException(stdErr);
+            var argError = new UriFormatException(ex.Message);
             await argError.LogAsync();
         }
     }
