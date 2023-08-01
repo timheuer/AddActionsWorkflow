@@ -9,7 +9,7 @@ internal partial class OptionsProvider
     public class GeneralOptions : BaseOptionPage<General> { }
 }
 
-public class General : BaseOptionModel<General>, IRatingConfig
+public class General : BaseOptionModel<General>
 {
     [Category("Generator")]
     [DisplayName("Default file name")]

@@ -7,5 +7,6 @@
   },
   "overview": "README.md",
   "publisher": "TimHeuer",
-  "repo": "https://github.com/timheuer/AddActionsWorkflow"
+  "repo": "https://github.com/timheuer/AddActionsWorkflow",
+  "qna": false
 }

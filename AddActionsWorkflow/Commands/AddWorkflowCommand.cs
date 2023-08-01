@@ -1,8 +1,10 @@
 ﻿using AddActionsWorkflow.Options;
 using CliWrap;
 using LibGit2Sharp;
+using Microsoft;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -48,12 +50,12 @@ internal sealed class AddWorkflowCommand : BaseCommand<AddWorkflowCommand>
                 proj = await sln.AddSolutionFolderAsync(options.SolutionFolderName);
 
             _ = await proj?.AddExistingFilesAsync(Path.Combine(slnDir, @$".github\workflows\{finaleWorkflowname}.yaml"));
-            await VS.StatusBar.ShowMessageAsync("GitHub Actions Worklfow creation finished.");
+            await VS.StatusBar.ShowMessageAsync("GitHub Actions Workflow creation finished.");
         }
         else
         {
             // didn't happen, show an error
-            await VS.StatusBar.ShowMessageAsync("GitHub Actions Worklfow creation failed.");
+            await VS.StatusBar.ShowMessageAsync("GitHub Actions Workflow creation failed.");
         }
     }
 
@@ -89,14 +91,11 @@ internal sealed class AddWorkflowCommand : BaseCommand<AddWorkflowCommand>
         await VS.StatusBar.ShowMessageAsync("Establishing git root directory...");
         var rootGitDir = workingDirectory;
 
-        while (!Directory.Exists(Path.Combine(rootGitDir, ".git")))
-        {
-            rootGitDir = Path.GetFullPath(Path.Combine(rootGitDir, ".."));
-        }
+        FindGitFolder(rootGitDir, out string gitPath);
 
         try
         {
-            using (var repo = new Repository(rootGitDir))
+            using (var repo = new Repository(gitPath))
             {
                 if (useCurrentBranch) branchName = repo.Head.FriendlyName;
                 rootGitDir = repo.Info.WorkingDirectory;
@@ -108,5 +107,25 @@ internal sealed class AddWorkflowCommand : BaseCommand<AddWorkflowCommand>
         }
 
         return rootGitDir;
+    }
+
+    internal void FindGitFolder(string path, out string foundPath)
+    {
+        foundPath = null;
+        // Check if the current directory contains a .git folder
+        if (Directory.Exists(Path.Combine(path, ".git")))
+        {
+            foundPath = path;
+            return;
+        }
+        else
+        {
+            string parentPath = Directory.GetParent(path)?.FullName;
+            if (!string.IsNullOrEmpty(parentPath))
+            {
+                FindGitFolder(parentPath, out foundPath); // Recursively search the parent directory
+            }
+        }
+        return;
     }
 }
