@@ -12,8 +12,8 @@ namespace AddActionsWorkflow;
 [InstalledProductRegistration(Vsix.Name, Vsix.Description, Vsix.Version)]
 [ProvideMenuResource("Menus.ctmenu", 1)]
 [Guid(PackageGuids.AddActionsWorkflowString)]
-[ProvideOptionPage(typeof(OptionsProvider.GeneralOptions), "GitHub Actions Workflow", "General", 0, 0, true)]
-[ProvideProfile(typeof(OptionsProvider.GeneralOptions), "GitHub Actions Workflow", "General", 0, 0, true)]
+[ProvideOptionPage(typeof(OptionsProvider.GeneralOptions), "GitHub", "Workflow Generation", 0, 0, true)]
+[ProvideProfile(typeof(OptionsProvider.GeneralOptions), "GitHub", "Workflow Generation", 0, 0, true)]
 [ProvideBindingPath]
 public sealed class AddActionsWorkflowPackage : ToolkitPackage
 {
